@@ -10,3 +10,10 @@ clap = { version = "4.5.27", features = ["derive"] }
 lazy_static = "1.5.0"
 ldap3 = { version = "0.11.5", features = ["sync", "tls-rustls"], default-features = false }
 regex = "1.11.1"
+
+[profile.release]
+opt-level = 'z'
+lto = true
+codegen-units = 1
+panic = 'abort'
+strip = true
