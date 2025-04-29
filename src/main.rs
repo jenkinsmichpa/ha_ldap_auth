@@ -1,8 +1,8 @@
-use std::{env, process};
-use ldap3::{LdapConn, Scope, SearchEntry, ldap_escape};
 use clap::Parser;
 use lazy_static::lazy_static;
+use ldap3::{ldap_escape, LdapConn, Scope, SearchEntry};
 use regex::Regex;
+use std::{env, process};
 
 #[derive(Parser, Debug)]
 #[command(name = "Home Assistant LDAP Authenticator")]
@@ -12,7 +12,7 @@ struct Args {
     /// URL of LDAP/LDAPS authentication server
     #[arg(long, default_value_t = String::from("ldaps://localhost:636"))]
     ldap_server_url: String,
-    
+
     /// Distinguished name of LDAP OU containing users
     #[arg(long, default_value_t = String::from("ou=users,dc=domain,dc=tld"))]
     ldap_user_dn: String,
@@ -42,7 +42,6 @@ lazy_static! {
 }
 
 fn main() {
-
     let args = Args::parse();
 
     let username = match env::var("username") {
@@ -52,11 +51,14 @@ fn main() {
                 process::exit(1)
             }
             username_result
-        },
+        }
         Err(err) => {
-            eprintln!("Failed to retrieve 'username' from environment variables: {}", err);
+            eprintln!(
+                "Failed to retrieve 'username' from environment variables: {}",
+                err
+            );
             process::exit(1)
-        },
+        }
     };
 
     let password = match env::var("password") {
@@ -66,15 +68,21 @@ fn main() {
                 process::exit(1)
             }
             password_result
-        },
+        }
         Err(err) => {
-            eprintln!("Failed to retrieve 'password' from environment variables: {}", err);
+            eprintln!(
+                "Failed to retrieve 'password' from environment variables: {}",
+                err
+            );
             process::exit(1)
-        },
+        }
     };
 
     let ldap_server_url = &args.ldap_server_url;
-    if !LDAP_FQDN_URL_REGEX.is_match(ldap_server_url) && !LDAP_IPv4_URL_REGEX.is_match(ldap_server_url) && !LDAP_IPv6_URL_REGEX.is_match(ldap_server_url) {
+    if !LDAP_FQDN_URL_REGEX.is_match(ldap_server_url)
+        && !LDAP_IPv4_URL_REGEX.is_match(ldap_server_url)
+        && !LDAP_IPv6_URL_REGEX.is_match(ldap_server_url)
+    {
         eprintln!("Invalid LDAP server URL format: {}", ldap_server_url);
         process::exit(1);
     }
@@ -126,17 +134,15 @@ fn main() {
         &ldap_username_dn,
         Scope::Subtree,
         &ldap_username_relative_dn,
-        vec!["displayName", "memberOf"]
+        vec!["displayName", "memberOf"],
     ) {
-        Ok(search_result) => {
-            match search_result.success() {
-                Ok((search_result_entries, _)) => {
-                    search_result_entries.into_iter().map(SearchEntry::construct)
-                },
-                Err(err) => {
-                    eprintln!("Search operation failed: {}", err);
-                    process::exit(1)
-                }
+        Ok(search_result) => match search_result.success() {
+            Ok((search_result_entries, _)) => search_result_entries
+                .into_iter()
+                .map(SearchEntry::construct),
+            Err(err) => {
+                eprintln!("Search operation failed: {}", err);
+                process::exit(1)
             }
         },
         Err(err) => {
@@ -173,5 +179,4 @@ fn main() {
     } else {
         eprintln!("User does not belong to the required user group.");
     }
-
 }
