@@ -22,6 +22,8 @@ jobs:
       run: rustup target add x86_64-unknown-linux-musl
     - name: Install Dependencies
       run: sudo apt install musl-tools
+    - name: Cache Rust Dependencies
+      uses: Swatinem/rust-cache@v2
     - name: Build
       run: cargo build --release --target x86_64-unknown-linux-musl
     - name: Create GitHub Release
