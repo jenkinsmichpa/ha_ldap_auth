@@ -6,7 +6,7 @@ edition = "2021"
 description = "Performs LDAP searches to provide command line authentication to Home Assistant"
 
 [dependencies]
-clap = { version = "4.5.49", features = ["derive"] }
+clap = { version = "4.5.50", features = ["derive"] }
 lazy_static = "1.5.0"
 ldap3 = { version = "0.12.1", features = ["sync", "tls-rustls", "rustls-provider"], default-features = false }
 regex = "1.12.2"
