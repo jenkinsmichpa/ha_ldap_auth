@@ -1,19 +1,23 @@
 [package]
 name = "ha_ldap_auth"
-version = "0.1.0"
+version = "1.0.3"
 authors = ["Michael Jenkins <jenkinsmichpa@gmail.com>"]
-edition = "2021"
+edition = "2024"
 description = "Performs LDAP searches to provide command line authentication to Home Assistant"
 
 [dependencies]
-clap = { version = "4.6.1", features = ["derive"] }
-lazy_static = "1.5.0"
-ldap3 = { version = "0.12.1", features = ["sync", "tls-rustls", "rustls-provider"], default-features = false }
-regex = "1.12.3"
+clap = { version = "4.6.1", features = ["derive", "cargo"] }
+ldap3 = { version = "0.12.1", features = [
+  "sync",
+  "tls-rustls",
+  "rustls-provider",
+], default-features = false }
+url = "2.5.8"
+ldapdn = "1.0.0"
 
 [profile.release]
 opt-level = 'z'
 lto = true
 codegen-units = 1
-panic = 'abort'
 strip = true
+panic = 'abort'

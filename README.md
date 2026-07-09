@@ -1,16 +1,22 @@
 # Home Assistant LDAP Authenticator
-Performs LDAP authentication for Home Assistant through the command line authentication provider.
 
-*I am not a software engineer and the security of this application is best-effort.*
+Performs LDAP authentication for Home Assistant through the command line
+authentication provider.
+
+*I am not a software engineer and the security of this application is
+best-effort.*
 
 ## Function
- - Validates users against an LDAP/LDAPS server such as [Authentik](https://github.com/goauthentik/authentik).
- - Performs user and group membership meta checks.
- - Outputs process errors to stderr.
- - Self contained and works within HAOS.
+
+- Validates users against an LDAP/LDAPS server such as [Authentik](https://github.com/goauthentik/authentik).
+- Performs user and group membership meta checks.
+- Validates LDAP URLs and DNs.
+- Outputs process errors to stderr.
+- Self contained and works within HAOS.
 
 ## Usage
-```bash
+
+```text
 Usage: ha_ldap_auth [OPTIONS]
 
 Options:
@@ -26,6 +32,8 @@ Options:
           Name of group containing Home Assistant Admins [default: "Home Assistant Admins"]
       --ha-local-only-group <HA_LOCAL_ONLY_GROUP>
           Name of group containing Local Only Home Assistant Users [default: "Local Only Home Assistant Users"]
+      --tls-no-verify
+          Disable TLS certificate verification (use with caution)
   -h, --help
           Print help
   -V, --version
@@ -33,7 +41,9 @@ Options:
 ```
 
 ## Home Assistant Configuration
- - Download the file to a persistent filepath and configure LDAP authentication parameters through the Home Assistant `configuration.yaml` file.
+
+- Download the file to a persistent filepath and configure LDAP authentication parameters through the Home Assistant `configuration.yaml` file.
+
 ```yaml
 homeassistant:
   auth_providers:
