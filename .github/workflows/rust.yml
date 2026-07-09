@@ -1,4 +1,4 @@
-name: Rust
+name: CI
 
 on:
   push:
@@ -32,6 +32,12 @@ jobs:
 
     - name: Build
       run: cargo build --release --target x86_64-unknown-linux-musl
+
+    - name: Upload binary          # ← this is missing
+      uses: actions/upload-artifact@v4
+      with:
+        name: ha_ldap_auth
+        path: target/x86_64-unknown-linux-musl/release/ha_ldap_aut
 
   release:
     name: Create Release
