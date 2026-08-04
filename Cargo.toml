@@ -6,12 +6,11 @@ edition = "2024"
 description = "Performs LDAP searches to provide command line authentication to Home Assistant"
 
 [dependencies]
-clap = { version = "4.6.1", features = ["derive", "cargo"] }
-ldap3 = { version = "0.12.1", features = [
+clap = { version = "4.6.5", features = ["derive", "cargo"] }
+ldap3 = { version = "0.12.1", default-features = false, features = [
   "sync",
-  "tls-rustls",
-  "rustls-provider",
-], default-features = false }
+  "tls-rustls-ring",
+] }
 url = "2.5.8"
 ldapdn = "1.0.0"
 
