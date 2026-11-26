@@ -17,7 +17,7 @@ best-effort.*
 ## Usage
 
 ```text
-Usage: ha_ldap_auth [OPTIONS]
+Usage: ha-ldap-auth [OPTIONS]
 
 Options:
       --ldap-server-url <LDAP_SERVER_URL>
@@ -49,7 +49,7 @@ homeassistant:
   auth_providers:
     - type: homeassistant
     - type: command_line
-      command: /config/scripts/ha_ldap_auth
+      command: /config/scripts/ha-ldap-auth
       args:
         [
           "--ldap-server-url",

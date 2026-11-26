@@ -1,38 +1,38 @@
-use clap::{Parser, crate_authors, crate_description, crate_version};
+use clap::Parser;
 use ldap3::{LdapConn, LdapConnSettings, Scope, SearchEntry, dn_escape, ldap_escape};
 use ldapdn::parse::dn_from_str;
 use std::{collections::HashMap, env, process, time::Duration};
 use url::Url;
 
 #[derive(Parser, Debug)]
-#[command(name = "Home Assistant LDAP Authenticator", version = crate_version!(), about = crate_description!(), author = crate_authors!(), long_about = None)]
+#[command(name = "Home Assistant LDAP Authenticator", version, about, long_about = None)]
 struct Args {
     /// URL of LDAP/LDAPS authentication server
-    #[arg(long, default_value_t = String::from("ldaps://localhost:636"))]
+    #[arg(long, default_value = "ldaps://localhost:636")]
     ldap_server_url: String,
 
     /// Distinguished name of LDAP OU containing users
-    #[arg(long, default_value_t = String::from("ou=users,dc=domain,dc=tld"))]
+    #[arg(long, default_value = "ou=users,dc=domain,dc=tld")]
     ldap_user_dn: String,
 
     /// Distinguished name of LDAP OU containing groups
-    #[arg(long, default_value_t = String::from("ou=groups,dc=domain,dc=tld"))]
+    #[arg(long, default_value = "ou=groups,dc=domain,dc=tld")]
     ldap_group_dn: String,
 
     /// Name of group containing Home Assistant Users
-    #[arg(long, default_value_t = String::from("Home Assistant Users"))]
+    #[arg(long, default_value = "Home Assistant Users")]
     ha_user_group: String,
 
     /// Name of group containing Home Assistant Admins
-    #[arg(long, default_value_t = String::from("Home Assistant Admins"))]
+    #[arg(long, default_value = "Home Assistant Admins")]
     ha_admin_group: String,
 
     /// Name of group containing Local Only Home Assistant Users
-    #[arg(long, default_value_t = String::from("Local Only Home Assistant Users"))]
+    #[arg(long, default_value = "Local Only Home Assistant Users")]
     ha_local_only_group: String,
 
     /// Disable TLS certificate verification (use with caution)
-    #[arg(long, default_value_t = false)]
+    #[arg(long)]
     tls_no_verify: bool,
 }
 
@@ -67,11 +67,11 @@ fn is_valid_ldap_dn(dn_str: &str) -> bool {
     dn_from_str(dn_str).all(|rdn| rdn.is_ok())
 }
 
-fn get_attr<'a>(attrs: &'a HashMap<String, Vec<String>>, name: &str) -> Option<&'a Vec<String>> {
+fn get_attr<'a>(attrs: &'a HashMap<String, Vec<String>>, name: &str) -> Option<&'a [String]> {
     attrs
         .iter()
         .find(|(k, _)| k.eq_ignore_ascii_case(name))
-        .map(|(_, v)| v)
+        .map(|(_, v)| v.as_slice())
 }
 
 fn connect_to_ldap(url: &str, no_tls_verify: bool) -> LdapConn {
@@ -152,8 +152,7 @@ fn main() {
     let ldap_user_dn = &args.ldap_user_dn;
     let ldap_group_dn = &args.ldap_group_dn;
 
-    let ldap_username_relative_dn = format!("cn={}", dn_escape(&username));
-    let ldap_username_dn = format!("{ldap_username_relative_dn},{ldap_user_dn}");
+    let ldap_username_dn = format!("cn={},{ldap_user_dn}", dn_escape(&username));
 
     let mut ldap_connection = connect_to_ldap(&args.ldap_server_url, args.tls_no_verify);
     bind_to_ldap(&mut ldap_connection, &ldap_username_dn, &password);
@@ -184,7 +183,7 @@ fn main() {
             display_name = display_name_entries.first().cloned().unwrap_or_default();
         }
         if let Some(group_entries) = get_attr(&ldap_entry.attrs, "memberOf") {
-            groups.extend(group_entries.clone());
+            groups.extend_from_slice(group_entries);
         }
     }
 
@@ -192,18 +191,19 @@ fn main() {
         display_name = username;
     }
 
-    let is_user = groups.iter().any(|g| {
-        g.eq_ignore_ascii_case(&format!("cn={},{ldap_group_dn}", dn_escape(ha_user_group)))
-    });
-    let is_admin = groups.iter().any(|g| {
-        g.eq_ignore_ascii_case(&format!("cn={},{ldap_group_dn}", dn_escape(ha_admin_group)))
-    });
-    let is_local_only = groups.iter().any(|g| {
-        g.eq_ignore_ascii_case(&format!(
-            "cn={},{ldap_group_dn}",
-            dn_escape(ha_local_only_group)
-        ))
-    });
+    let user_group_dn = format!("cn={},{ldap_group_dn}", dn_escape(ha_user_group));
+    let admin_group_dn = format!("cn={},{ldap_group_dn}", dn_escape(ha_admin_group));
+    let local_only_group_dn = format!("cn={},{ldap_group_dn}", dn_escape(ha_local_only_group));
+
+    let is_user = groups
+        .iter()
+        .any(|g| g.eq_ignore_ascii_case(&user_group_dn));
+    let is_admin = groups
+        .iter()
+        .any(|g| g.eq_ignore_ascii_case(&admin_group_dn));
+    let is_local_only = groups
+        .iter()
+        .any(|g| g.eq_ignore_ascii_case(&local_only_group_dn));
 
     if is_user {
         println!("name = {display_name}");

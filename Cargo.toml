@@ -1,20 +1,17 @@
 [package]
-name = "ha_ldap_auth"
+name = "ha-ldap-auth"
 version = "1.0.3"
 edition = "2024"
+rust-version = "1.88"
 description = "Performs LDAP searches to provide command line authentication to Home Assistant"
 
-[workspace.lints.cargo]
-unused_dependencies = "warn"
-unused_workspace_dependencies = "warn"
-
 [dependencies]
-clap = { version = "4.6.7", features = ["derive", "cargo"] }
+clap = { version = "4.6.10", features = ["derive"] }
 ldap3 = { version = "0.12.1", default-features = false, features = [
   "sync",
   "tls-rustls-ring",
 ] }
-url = "2.5.8"
+url = "2.5.9"
 ldapdn = "1.0.0"
 
 [profile.release]
@@ -23,11 +20,40 @@ lto = true
 codegen-units = 1
 strip = true
 
+[lints.cargo]
+unused_dependencies = "warn"
+unused_workspace_dependencies = "warn"
+non_kebab_case_bins = "warn"
+non_kebab_case_packages = "warn"
+non_kebab_case_features = "warn"
+non_snake_case_features = "warn"
+
+[lints.rust]
+unsafe_code = "warn"
+single_use_lifetimes = "warn"
+trivial_numeric_casts = "warn"
+unreachable_pub = "warn"
+unused_lifetimes = "warn"
+unused_qualifications = "warn"
+
+[lints.rustdoc]
+broken_intra_doc_links = "warn"
+
 [lints.clippy]
 correctness = { level = "warn", priority = -1 }
+suspicious = { level = "warn", priority = -1 }
 perf = { level = "warn", priority = -1 }
 complexity = { level = "warn", priority = -1 }
 pedantic = { level = "warn", priority = -1 }
 nursery = { level = "warn", priority = -1 }
 style = { level = "warn", priority = -1 }
-suspicious = { level = "warn", priority = -1 }
+redundant_pub_crate = "allow" # Conflicts with `unreachable_pub`
+allow_attributes_without_reason = "warn"
+dbg_macro = "warn"
+todo = "warn"
+undocumented_unsafe_blocks = "warn"
+missing_safety_doc = "warn"
+unnecessary_safety_comment = "warn"
+unnecessary_safety_doc = "warn"
+wildcard_imports = "warn"
+multiple_unsafe_ops_per_block = "warn"
